@@ -72,19 +72,13 @@ We compare three approaches that take $\mathbf{X}_t$ as input and predict $\wide
 
 \vspace{5mm}
 
-\textbf{\normalsize Baseline regression (Ridge):}  
-Flatten the last $L$ time steps ($L\times 3$ features) into a single vector and apply a linear model with $\ell_2$ regularization:
-\[
-\widehat{\mathbf{y}}_t = W\,\mathrm{vec}(\mathbf{X}_t) + \mathbf{b}, 
-\quad
-\min_{W,\mathbf{b}}\;\frac{1}{M}\sum_{t}\|\widehat{\mathbf{y}}_t - \mathbf{y}_t\|_2^2 + \lambda \|W\|_F^2.
-\]
+\textbf{\normalsize Baseline regression (Random Forest):}  
+An ensemble of decision trees trained on the flattened $L\times 3$ window. Each tree learns simple split rules and the forest averages their predictions to capture nonlinear relations while reducing variance.
 
 \textbf{Expected behavior:} 
 \begin{itemize}
-  \item Captures some nonlinearity via high-dimensional features but remains a smooth linear map in those features and extrapolates poorly.
-  \item Fast and robust baseline for one-step prediction; typically outperformed by sequence models.
-
+  \item Handles nonlinear mappings on tabular features but does not model temporal continuity explicitly.
+  \item Good baseline for one-step prediction; typically worse than sequence models on smooth dynamical systems.
 \end{itemize}
 
 \textbf{\normalsize Long Short-Term Memory (LSTM):}  
@@ -156,14 +150,11 @@ The observed ranking (LSTM $<$ PINN $<$ Random Forest in MSE) is consistent with
 \section{Conclusion}
 \label{sec:conclusion}
 
-We compared three approaches for one-step prediction of the Lorenz system from short history windows ($L=50$): a tabular baseline (Random Forest), a sequence model (LSTM), and a physics-informed neural network (PINN). Using standardized data, a clean train/validation/test split, and a held-out trajectory from a different initial condition, the LSTM achieved the lowest one-step MSE, followed by the PINN, with the Random Forest performing worst.
+We compared three approaches for one-step prediction of the Lorenz system from short history windows ($L=50$): a baseline (Random Forest), a sequence model (LSTM), and a physics-informed neural network (PINN). Using standardized data, a clean train/validation/test split, and a held-out trajectory from a different initial condition, the LSTM achieved the lowest one-step MSE, followed by the PINN, with the Random Forest performing worst.
 
 This outcome differs from our initial expectation that the PINN would outperform the LSTM due to its physics prior. The likely explanations include the PINN’s objective to balance data fit and ODE residuals rather than directly optimizing next-step error and loss tuning choices leading overfitting in data-only models or underfitting in physics-regularized ones.
 
 Practically, if the goal is lowest next-step error on data from the same regime, LSTMs are a strong choice. If the goal is physical consistency or data efficiency PINNs remain attractive but require careful tuning of physics/data losses and training strategy.
-
-
-\end{itemize}
 
 \bibliographystyle{plain}
 \bibliography{bibfile}
